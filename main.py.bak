@@ -166,7 +166,7 @@ def GetUserJson(deptId,text,stuNum,userName,RuleId,templateid):
     }    
 #打卡提交函数
 def check_in(text,stuNum,userName,RuleId,templateid):
-    deptId = 233169
+    deptId = 
     sign_url = "https://reportedh5.17wanxiao.com/sass/api/epmpics"
     jsons=GetUserJson(deptId,text,stuNum,userName,RuleId,templateid)
     #提交打卡
