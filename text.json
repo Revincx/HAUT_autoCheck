@@ -6053,55 +6053,55 @@
 			},
 		{
 			"deptid": 233164,
-			"deptName": "机械类2001",
+			"name": "机械类2001",
 			"parentId": 71768,
 			"hasLeaf": false,
 			"childs": []
 		}, {
 			"deptid": 233165,
-			"deptName": "机械类2002",
+			"name": "机械类2002",
 			"parentId": 71768,
 			"hasLeaf": false,
 			"childs": []
 		}, {
 			"deptid": 233166,
-			"deptName": "机械类2003",
+			"name": "机械类2003",
 			"parentId": 71768,
 			"hasLeaf": false,
 			"childs": []
 		}, {
 			"deptid": 233167,
-			"deptName": "机械类2004",
+			"name": "机械类2004",
 			"parentId": 71768,
 			"hasLeaf": false,
 			"childs": []
 		}, {
 			"deptid": 233168,
-			"deptName": "机械类2005",
+			"name": "机械类2005",
 			"parentId": 71768,
 			"hasLeaf": false,
 			"childs": []
 		}, {
 			"deptid": 233169,
-			"deptName": "机械类2006",
+			"name": "机械类2006",
 			"parentId": 71768,
 			"hasLeaf": false,
 			"childs": []
 		}, {
 			"deptid": 233170,
-			"deptName": "机械类2007",
+			"name": "机械类2007",
 			"parentId": 71768,
 			"hasLeaf": false,
 			"childs": []
 		}, {
 			"deptid": 233171,
-			"deptName": "机械类2008",
+			"name": "机械类2008",
 			"parentId": 71768,
 			"hasLeaf": false,
 			"childs": []
 		}, {
 			"deptid": 233172,
-			"deptName": "机械类2009",
+			"name": "机械类2009",
 			"parentId": 71768,
 			"hasLeaf": false,
 			"childs": []
