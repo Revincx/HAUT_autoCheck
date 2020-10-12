@@ -50,7 +50,7 @@ def main():
     if (nowTime >= 6) & (nowTime < 8):
         templateid = "clockSign1"
         RuleId = 146
-    elif (nowTime >= 12) & (nowTime < 14):
+    elif (nowTime >= 11) & (nowTime < 15):
         templateid = "clockSign2"
         RuleId = 147
     elif (nowTime >= 21) & (nowTime< 22):
@@ -92,6 +92,7 @@ def main():
             except:
                 print("服务器错误！")
                 failure.append(value[-6:])
+                msg = "请仔细检查USERS!"
                 break
         print(msg)
         print("-----------------------")
@@ -111,23 +112,23 @@ def GetNowTime():
     return strTime
 
 #班级获取函数
-# def GetDeptId(text):
-    # try:
-        # TextStr = text.split('-', 3)
-        # ClassName = TextStr[2] 
-    # # 获取deptId
-    # except:
-        # print("获取失败，请检查格式")
-    # try:
-        # for Class in AllClass:
-            # if (Class['name'] == ClassName):
-                # deptId = Class['deptId']
-        # if deptId:
-            # print('获取deptId成功!')
-    # except:
-        # print("获取deptId失败！")
-        # exit(1)
-    # return deptId
+def GetDeptId(text):
+    try:
+        TextStr = text.split('-', 3)
+        ClassName = TextStr[2] 
+    # 获取deptId
+    except:
+        print("获取失败，请检查格式")
+    try:
+        for Class in AllClass:
+            if (Class['name'] == ClassName):
+                deptId = Class['deptId']
+        if deptId:
+            print('获取deptId成功!')
+    except:
+        print("获取deptId失败！")
+        exit(1)
+    return deptId
 #打卡参数配置函数
 def GetUserJson(deptId,text,stuNum,userName,RuleId,templateid):
     #随机温度(36.2~36.8)
