@@ -1,111 +1,94 @@
-import time
-import json
-import requests
-import random
-import datetime
-import os
+import time,json,requests,random,datetime,os,sys
+from campus import CampusCard
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 
-#json读取函数
-def GetFromJSON(filename): 
-    flag = False
-    idStr={} 
-    try:
-        j_file=open(filename,'r', encoding='utf8')
-        idStr=json.load(j_file)
-        flag=True
-    except:
-        print('从%s读取JSON数据出错！'%filename)
-    finally:
-        if flag:
-            j_file.close()
-    return idStr
-
-#读取text.json文件
-filename = r'text.json'
-jsonDic = GetFromJSON(filename)
-AllClass = jsonDic['data']['classAll']
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
+driver = webdriver.Chrome('/usr/bin/chromedriver', chrome_options=chrome_options)
 
 def main():
     #sectets字段录入
-    userName = []
-    stuNum = []
-    text = []
-    sckey = []
-    success = []
-    failure = []
-    result = []
+    text, sckey, success, failure, result, phone, password = [], [], [], [], [], [], []
     #多人循环录入
     while True:  
         try:
             users = input()
             info = users.split(',')
-            userName.append(info[0])
-            stuNum.append(info[1])
+            phone.append(info[0])
+            password.append(info[1])
             text.append(info[2])
             sckey.append(info[3])
         except:
             break
-    #早中午判断
-    nowTime = (time.localtime().tm_hour + 8 ) % 24
-    if (nowTime >= 6) & (nowTime < 8):
-        templateid = "clockSign1"
-        RuleId = 146
-    elif (nowTime >= 11) & (nowTime < 15):
-        templateid = "clockSign2"
-        RuleId = 147
-    elif (nowTime >= 21) & (nowTime< 22):
-        templateid = "clockSign3"
-        RuleId = 148
-    else:
-        print("现在时间%d点%d分，打卡时间未到！" %(nowTime,time.localtime().tm_min))
-        exit(0)
+
+    templateid = "clockSign2"
+    RuleId = 147
 
     #提交打卡
-    for index,value in enumerate(stuNum):
-        print("开始获取用户%sDeptId"%(value[-6:]))
+    for index,value in enumerate(phone):
+        print("开始获取用户%sDeptId"%(value[-4:]))
         count = 0
         while (count < 3):
             try:
-                response = check_in(text[index],stuNum[index],userName[index],RuleId,templateid)
-                if  response.json()["msg"] == '成功'and count == 0:
+                campus = CampusCard(phone[index], password[index])
+                loginJson = campus.get_main_info()
+                token = campus.user_info["sessionId"]
+                stuNum = loginJson["outid"]
+                userName = loginJson["name"]  
+                driver.get('https://reportedh5.17wanxiao.com/collegeHealthPunch/index.html?token=%s#/punch?punchId=180'%token)
+                #time.sleep(10)
+                response = check_in(text[index],stuNum,userName,RuleId,templateid,token)
+                if  response.json()["msg"] == '成功'and index == 0:
                     strTime = GetNowTime()
-                    success.append(value[-6:])
+                    success.append(value[-4:])
                     print(response.text)
-                    msg = value[-6:]+"打卡成功-" + strTime
+                    msg = value[-4:]+"打卡成功-" + strTime
                     result=response
                     break
+                elif response.json()["msg"] == '业务异常'and index == 0:
+                    strTime = GetNowTime()
+                    failure.append(value[-4:])
+                    print(response.text)
+                    msg = value[-4:]+"打卡失败-" + strTime
+                    result=response
+                    count = count + 1
                 elif response.json()["msg"] == '成功':
                     strTime = GetNowTime()
-                    success.append(value[-6:])
+                    success.append(value[-4:])
                     print(response.text)
-                    msg = value[-6:]+"打卡成功-" + strTime
+                    msg = value[-4:]+"打卡成功-" + strTime
                     break
                 else:
                     strTime = GetNowTime()
-                    failure.append(value[-6:])
+                    failure.append(value[-4:])
                     print(response.text)
-                    msg = value[-6:] + "打卡异常-" + strTime
+                    msg = value[-4:] + "打卡异常-" + strTime
                     count = count + 1
                     print('%s打卡失败，开始第%d次重试...'%(value[-6:],count))
                     time.sleep(15)
-                
+        
             except:
-                print("服务器错误！")
-                failure.append(value[-6:])
-                msg = "请仔细检查USERS!"
+                msg = "出现错误"
+                failure.append(value[-4:])
                 break
         print(msg)
         print("-----------------------")
     fail = sorted(set(failure),key=failure.index)
     strTime = GetNowTime()
-    title = "%s人打卡成功,%s人打卡失败-"%(len(success),len(fail)) + strTime 
+    title = "成功: %s 人,失败: %s 人"%(len(success),len(fail))
     try:
         if  len(sckey[0])>2:
             print('主用户开始微信推送...')
             WechatPush(title,sckey[0],success,fail,result)
     except:
-        print("Maybe主用户打卡失败!")
-
+        print("微信推送出错！")
+#时间函数
 def GetNowTime():
     cstTime = (datetime.datetime.utcnow() + datetime.timedelta(hours=8))
     strTime = cstTime.strftime("%H:%M:%S")
@@ -129,8 +112,9 @@ def GetDeptId(text):
         print("获取deptId失败！")
         exit(1)
     return deptId
+
 #打卡参数配置函数
-def GetUserJson(deptId,text,stuNum,userName,RuleId,templateid):
+def GetUserJson(deptId,text,stuNum,userName,RuleId,templateid,token):
     #随机温度(36.2~36.8)
     a=random.uniform(36.2,36.8)
     temperature = round(a, 1)
@@ -162,31 +146,49 @@ def GetUserJson(deptId,text,stuNum,userName,RuleId,templateid):
             }
         ],
         "customerAppTypeRuleId": RuleId,
-        "clockState": 0
+        "clockState": 0,
+        "token": token
         },
+        "token": token
     }    
+
 #打卡提交函数
-def check_in(text,stuNum,userName,RuleId,templateid):
-    deptId = 233169
+def check_in(text,stuNum,userName,RuleId,templateid,token):
+    deptId = GetDeptId(text)
     sign_url = "https://reportedh5.17wanxiao.com/sass/api/epmpics"
-    jsons=GetUserJson(deptId,text,stuNum,userName,RuleId,templateid)
+    jsons=GetUserJson(deptId,text,stuNum,userName,RuleId,templateid,token)
     #提交打卡
-    response = requests.post(sign_url, json=jsons)
+    response = requests.post(sign_url, json=jsons,)
     return response
+
+#json读取函数
+def GetFromJSON(filename): 
+    flag = False
+    idStr={} 
+    try:
+        j_file=open(filename,'r', encoding='utf8')
+        idStr=json.load(j_file)
+        flag=True
+    except:
+        print('从%s读取JSON数据出错！'%filename)
+    finally:
+        if flag:
+            j_file.close()
+
+        
+    return idStr
 
 #微信通知
 def WechatPush(title,sckey,success,fail,result):    
+    strTime = GetNowTime()
     page = json.dumps(result.json(), sort_keys=True, indent=4, separators=(',', ': '),ensure_ascii=False)
     content = f"""
-### 打卡成功用户：
-```
-{success}
-```    
-### 打卡失败用户:
-```
-{fail}
-```
-### 主用户打卡信息:
+`{strTime}` 
+#### 打卡成功用户：
+`{success}` 
+#### 打卡失败用户:
+`{fail}`
+#### 主用户打卡信息:
 ```
 {page}
 ```
@@ -206,4 +208,6 @@ def WechatPush(title,sckey,success,fail,result):
     except:
         print("微信推送参数错误")
 if __name__ == '__main__':
+    filename = r'text.json'
+    AllClass = GetFromJSON(filename)['data']['classAll']
     main()
