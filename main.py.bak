@@ -147,9 +147,7 @@ def wechatPush(title,sckey,success,fail,result):
             "desp":content
     }
     scurl='https://sc.ftqq.com/'+sckey+'.send'
-    print(scurl)
     req = requests.post(scurl,data=data)
-    print(req.text)
     if req.json()["errmsg"] == 'success':
         print("Server酱推送服务成功")
     else:

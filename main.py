@@ -29,8 +29,8 @@ def main():
                 userInfo=getUserInfo(token)
                 response = checkIn(userInfo,token)
                 strTime = getNowTime()
-                result = result + "用户"+value[-4:]+"："
-                result = result + response.text
+                result = result + "用户"+value[-4:]+"：\n"
+                result = result + response.text + '\n'
                 if response.json()["msg"] == '成功':
                     success.append(value[-4:])
                     print(response.text)
