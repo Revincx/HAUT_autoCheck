@@ -13,11 +13,12 @@ def main():
             info = users.split(',')
             phone.append(info[0])
             password.append(info[1])
-            sckey.append(info[2])
+            sckey.append(info[3])
         except Exception as e:
             break
 
     #提交打卡
+    result=""
     for index,value in enumerate(phone):
         print("开始尝试为用户%s打卡"%(value[-4:]))
         count = 0
@@ -28,6 +29,8 @@ def main():
                 userInfo=getUserInfo(token)
                 response = checkIn(userInfo,token)
                 strTime = getNowTime()
+                result = result + "用户"+value[-4:]+"：\n"
+                result = result + response.text + '\n'
                 if response.json()["msg"] == '成功':
                     success.append(value[-4:])
                     print(response.text)
@@ -41,8 +44,8 @@ def main():
                     if count<=3:
                         print('%s打卡失败，开始第%d次重试...'%(value[-4:],count))
                     time.sleep(5)
-                if index == 0:
-                    result=response
+                # if index == 0:
+                    # result=response
             except AttributeError:
                 print('%s获取信息失败，请检查密码！'%value[-4:])
                 break
@@ -55,11 +58,11 @@ def main():
         print("-----------------------")
     fail = sorted(set(failure),key=failure.index)
     title = "成功: %s 人,失败: %s 人"%(len(success),len(fail))
-    try:
-        print('主用户开始微信推送...')
-        wechatPush(title,sckey[0],success,fail,result)
-    except:
-        print("微信推送出错！")
+    # try:
+    print('主用户开始微信推送...')
+    wechatPush(title,sckey[0],success,fail,result)
+    # except:
+        # print("微信推送出错！")
 
 #时间函数
 def getNowTime():
@@ -126,7 +129,6 @@ def checkIn(userInfo,token):
 #微信通知
 def wechatPush(title,sckey,success,fail,result):    
     strTime = getNowTime()
-    page = json.dumps(result.json(), sort_keys=True, indent=4, separators=(',', ': '),ensure_ascii=False)
     content = f"""
 打卡时间：{strTime} 
 #### 打卡成功用户：
@@ -135,7 +137,7 @@ def wechatPush(title,sckey,success,fail,result):
 `{fail}`
 #### 主用户打卡信息:
 ```
-{page}
+{result}
 ```
 ### 😀[收藏此项目](https://github.com/YooKing/HAUT_autoCheck)
 
@@ -145,14 +147,11 @@ def wechatPush(title,sckey,success,fail,result):
             "desp":content
     }
     scurl='https://sc.ftqq.com/'+sckey+'.send'
-    try:
-        req = requests.post(scurl,data = data)
-        if req.json()["errmsg"] == 'success':
-            print("Server酱推送服务成功")
-        else:
-            print("Server酱推送服务失败")
-    except:
-        print("微信推送参数错误")
+    req = requests.post(scurl,data=data)
+    if req.json()["errmsg"] == 'success':
+        print("Server酱推送服务成功")
+    else:
+        print("Server酱推送服务失败")
 
 if __name__ == '__main__':
     main()

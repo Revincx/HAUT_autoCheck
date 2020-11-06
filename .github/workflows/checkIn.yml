@@ -9,7 +9,7 @@ on:
     - cron: 20 3 * * * 
 
 jobs:
-  bot:
+  check:
     runs-on: ubuntu-latest
     steps:
     - name: 'Checkout codes'
