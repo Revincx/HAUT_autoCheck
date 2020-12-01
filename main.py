@@ -52,12 +52,14 @@ def main():
             except Exception as e:
                 print(e.__class__)
                 msg = "出现错误"
+                result = result + "用户"+value[-4:]+"：\n"
+                result = result + "打卡失败：" + str(e.__class__)
                 failure.append(value[-4:])
                 break
         print(msg)
         print("-----------------------")
     fail = sorted(set(failure),key=failure.index)
-    title = "成功: %s 人,失败: %s 人"%(len(success),len(fail))
+    title = "共 %s 人，其中成功: %s 人，失败: %s 人"%(len(phone),len(success),len(fail))
     # try:
     print('主用户开始微信推送...')
     wechatPush(title,sckey[0],success,fail,result)
@@ -131,7 +133,7 @@ def wechatPush(title,sckey,success,fail,result):
     strTime = getNowTime()
     content = f"""
 打卡时间：{strTime} 
- 
+---
 #### 打卡成功用户：
 `{success}` 
 #### 打卡失败用户:
