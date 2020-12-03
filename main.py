@@ -59,7 +59,7 @@ def main():
         print(msg)
         print("-----------------------")
     fail = sorted(set(failure),key=failure.index)
-    title = "共 %s 人，其中成功: %s 人，失败: %s 人"%(len(phone),len(success),len(fail))
+    title = "共 %s 人，成功: %s 人，失败: %s 人"%(len(phone),len(success),len(fail))
     # try:
     print('主用户开始微信推送...')
     wechatPush(title,sckey[0],success,fail,result)
@@ -132,8 +132,11 @@ def checkIn(userInfo,token):
 def wechatPush(title,sckey,success,fail,result):    
     strTime = getNowTime()
     content = f"""
-打卡时间：{strTime} 
+    
+`打卡时间：{strTime} `
+
 ---
+
 #### 打卡成功用户：
 `{success}` 
 #### 打卡失败用户:
