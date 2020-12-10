@@ -53,7 +53,7 @@ def main():
                 print(e.__class__)
                 msg = "出现错误"
                 result = result + "用户"+value[-4:]+"：\n"
-                result = result + "打卡失败：" + str(e.__class__)
+                result = result + "打卡失败：" + e +"\n"
                 failure.append(value[-4:])
                 break
         print(msg)
