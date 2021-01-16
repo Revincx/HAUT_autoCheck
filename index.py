@@ -4,7 +4,7 @@ from campus import CampusCard
 
 def main():
     #调试模式
-    debug = True
+    debug = False
     #校内校外开关
     mark = 1
     #定义变量
@@ -14,7 +14,7 @@ def main():
     sckey.append(os.environ.get('sckey'))
     i = 1
     #多人循环录入
-    while i < 10:  
+    while True:  
         try:
             user = os.environ.get('user' + str(i))
             if debug:
@@ -24,7 +24,6 @@ def main():
             phone.append(user.split(',')[0])
             password.append(user.split(',')[1])
             i+=1
-            # if i > 2:
         except:
             break
 
