@@ -1,2 +1,1 @@
-requests
-pycryptodome
+pycryptodome==3.9.9

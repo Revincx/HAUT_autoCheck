@@ -1,21 +1,30 @@
 import time,json,requests,random,datetime
+import os
 from campus import CampusCard
 
 def main():
+    #调试模式
+    debug = True
     #校内校外开关
     mark = 1
     #定义变量
     success,failure=[],[]
     #sectets字段录入
     phone, password, sckey = [], [], []
+    sckey.append(os.environ.get('sckey'))
+    i = 1
     #多人循环录入
-    while True:  
+    while i < 10:  
         try:
-            users = input()
-            info = users.split(',')
-            phone.append(info[0])
-            password.append(info[1])
-            sckey.append(info[2])
+            user = os.environ.get('user' + str(i))
+            if debug:
+                print(user)
+            if user is None:
+                break
+            phone.append(user.split(',')[0])
+            password.append(user.split(',')[1])
+            i+=1
+            # if i > 2:
         except:
             break
 
@@ -217,6 +226,8 @@ def wechatPush(title,sckey,success,fail,result):
     except:
         print("微信推送参数错误")
 
+def main_handler(event, context):
+    main()
+
 if __name__ == '__main__':
-    mark = 1
     main()
